@@ -1,0 +1,22 @@
+# Memo
+
+[![Build Status](https://travis-ci.org/ganglio/memo.svg?branch=master)](https://travis-ci.org/ganglio/memo)
+[![codecov](https://codecov.io/gh/ganglio/memo/branch/master/graph/badge.svg)](https://codecov.io/gh/ganglio/memo)
+[![GoDoc](https://godoc.org/github.com/ganglio/memo?status.svg)](https://godoc.org/github.com/ganglio/memo)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ganglio/memo)](https://goreportcard.com/report/github.com/ganglio/memo)
+
+Teeny-weeny cached variable library with auto refresh and anti stampede.
+
+## Usage
+
+```go
+v := 0
+counter := memo.Memo(func() interface{} {
+  v = v + 1
+  return v
+}, time.Second)
+
+for {
+  fmt.Printf("Counter %s", counter())
+}
+```
