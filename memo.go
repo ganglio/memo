@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// Memo creates a new cached variable with a given refresh interval
 func Memo(g func() interface{}, r time.Duration) func() interface{} {
 	m := struct {
 		sync.Mutex
