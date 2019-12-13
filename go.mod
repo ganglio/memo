@@ -1,4 +1,4 @@
-module memo
+module github.com/ganglio/memo
 
 go 1.13
 
