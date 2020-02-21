@@ -1,6 +1,7 @@
 package memo
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -21,6 +22,25 @@ func TestMemo(t *testing.T) {
 	assert.Equal(t, now, f()) // cached value and trigger refresh
 	time.Sleep(250 * time.Millisecond)
 	assert.NotEqual(t, now, f()) // refreshed value
+}
+
+func TestMemoX(t *testing.T) {
+	v := 0
+	f := MemoX(func() (interface{}, error) {
+		v = v + 1
+		if v >= 3 && v <= 7 {
+			return v, errors.New("Raising exception!")
+		}
+		return v, nil
+	}, 10*time.Millisecond)
+
+	p := -1
+	for i := 0; i < 20; i++ {
+		p = f().(int)
+		time.Sleep(50 * time.Millisecond)
+	}
+	assert.Equal(t, v, 20)
+	assert.Equal(t, p, 19)
 }
 
 func TestStampede(t *testing.T) {
