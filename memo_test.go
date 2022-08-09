@@ -43,6 +43,15 @@ func TestMemoX(t *testing.T) {
 	assert.Equal(t, p, 19)
 }
 
+func TestMemoX2(t *testing.T) {
+	f := MemoX(func() (interface{}, error) {
+		return nil, errors.New("Raising exception!")
+	}, 10*time.Millisecond)
+
+	p := f()
+	assert.Equal(t, errors.New("Raising exception!"), p)
+}
+
 func TestStampede(t *testing.T) {
 	v := 0
 	f := Memo(func() interface{} {
