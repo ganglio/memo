@@ -11,7 +11,7 @@ Teeny-weeny cached variable library with auto refresh and anti stampede.
 
 ```go
 v := 0
-counter := memo.Memo(func() interface{} {
+counter := memo.Memo(func() any {
   v = v + 1
   return v
 }, time.Second)
