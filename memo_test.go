@@ -11,7 +11,7 @@ import (
 
 func TestMemo(t *testing.T) {
 
-	f := Memo(func() interface{} {
+	f := Memo(func() any {
 		return fmt.Sprintf("Pesco %s", time.Now().Format("15:04:05"))
 	}, time.Second)
 
@@ -26,7 +26,7 @@ func TestMemo(t *testing.T) {
 
 func TestMemoX(t *testing.T) {
 	v := 0
-	f := MemoX(func() (interface{}, error) {
+	f := MemoX(func() (any, error) {
 		v = v + 1
 		if v >= 3 && v <= 7 {
 			return v, errors.New("Raising exception!")
@@ -44,7 +44,7 @@ func TestMemoX(t *testing.T) {
 }
 
 func TestMemoX2(t *testing.T) {
-	f := MemoX(func() (interface{}, error) {
+	f := MemoX(func() (any, error) {
 		return nil, errors.New("Raising exception!")
 	}, 10*time.Millisecond)
 
@@ -54,7 +54,7 @@ func TestMemoX2(t *testing.T) {
 
 func TestStampede(t *testing.T) {
 	v := 0
-	f := Memo(func() interface{} {
+	f := Memo(func() any {
 		v = v + 1
 		return v
 	}, time.Second)
@@ -63,7 +63,7 @@ func TestStampede(t *testing.T) {
 
 	c := 0
 	o := 0
-	for time.Now().Sub(t0) < 10*time.Second {
+	for time.Since(t0) < 10*time.Second {
 		c = c + 1
 		o = f().(int)
 	}
@@ -74,7 +74,7 @@ func TestStampede(t *testing.T) {
 
 func BenchmarkMemo(b *testing.B) {
 	v := 0
-	f := Memo(func() interface{} {
+	f := Memo(func() any {
 		v = v + 1
 		return v
 	}, time.Second)

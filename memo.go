@@ -6,7 +6,7 @@ import (
 )
 
 // Memo creates a new cached variable with a given refresh interval
-func Memo(g func() interface{}, r time.Duration) func() interface{} {
+func Memo(g func() any, r time.Duration) func() any {
 	m := struct {
 		sync.Mutex
 		data            interface{}
@@ -19,10 +19,10 @@ func Memo(g func() interface{}, r time.Duration) func() interface{} {
 		refreshInterval: r,
 		refreshing:      false,
 	}
-	return func() interface{} {
+	return func() any {
 		m.Lock()
 		defer m.Unlock()
-		if time.Now().Sub(m.lastUpdate) > m.refreshInterval {
+		if time.Since(m.lastUpdate) > m.refreshInterval {
 			if !m.refreshing {
 				m.refreshing = true
 				go func() {
@@ -39,10 +39,10 @@ func Memo(g func() interface{}, r time.Duration) func() interface{} {
 	}
 }
 
-func MemoX(g func() (interface{}, error), r time.Duration) func() interface{} {
+func MemoX(g func() (any, error), r time.Duration) func() any {
 	data, err := g()
 	if err != nil {
-		return func() interface{} {
+		return func() any {
 			return err
 		}
 	}
@@ -61,7 +61,7 @@ func MemoX(g func() (interface{}, error), r time.Duration) func() interface{} {
 	return func() interface{} {
 		m.Lock()
 		defer m.Unlock()
-		if time.Now().Sub(m.lastUpdate) > m.refreshInterval {
+		if time.Since(m.lastUpdate) > m.refreshInterval {
 			if !m.refreshing {
 				m.refreshing = true
 				go func() {
