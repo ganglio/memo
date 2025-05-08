@@ -5,13 +5,13 @@ import (
 	"time"
 )
 
-// Memo creates a new cached variable with a given refresh interval
-// It returns the cached value
-// The function is executed in a goroutine, and the result is cached
-func Memo(g func() any, r time.Duration) func() any {
+type Gen[T any] func() T
+type GenX[T any] func() (T, error)
+
+func (g Gen[T]) Memo(r time.Duration) Gen[T] {
 	m := struct {
 		sync.Mutex
-		data            interface{}
+		data            T
 		lastUpdate      time.Time
 		refreshInterval time.Duration
 		refreshing      bool
@@ -21,7 +21,7 @@ func Memo(g func() any, r time.Duration) func() any {
 		refreshInterval: r,
 		refreshing:      false,
 	}
-	return func() any {
+	return func() T {
 		m.Lock()
 		defer m.Unlock()
 		if time.Since(m.lastUpdate) > m.refreshInterval {
@@ -41,19 +41,14 @@ func Memo(g func() any, r time.Duration) func() any {
 	}
 }
 
-// MemoX creates a new cached variable with a given refresh interval and error handling
-// It returns the cached value or an error if the function fails
-// The function is executed in a goroutine, and the result is cached
-func MemoX(g func() (any, error), r time.Duration) func() any {
+func (g GenX[T]) MemoX(r time.Duration) (Gen[T], error) {
 	data, err := g()
 	if err != nil {
-		return func() any {
-			return err
-		}
+		return nil, err
 	}
 	m := struct {
 		sync.Mutex
-		data            interface{}
+		data            T
 		lastUpdate      time.Time
 		refreshInterval time.Duration
 		refreshing      bool
@@ -63,7 +58,7 @@ func MemoX(g func() (any, error), r time.Duration) func() any {
 		refreshInterval: r,
 		refreshing:      false,
 	}
-	return func() interface{} {
+	return func() T {
 		m.Lock()
 		defer m.Unlock()
 		if time.Since(m.lastUpdate) > m.refreshInterval {
@@ -74,13 +69,13 @@ func MemoX(g func() (any, error), r time.Duration) func() any {
 					m.Lock()
 					if err == nil {
 						m.data = data
+						m.lastUpdate = time.Now()
 					}
-					m.lastUpdate = time.Now()
 					m.refreshing = false
 					m.Unlock()
 				}()
 			}
 		}
 		return m.data
-	}
+	}, nil
 }
