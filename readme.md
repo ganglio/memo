@@ -7,7 +7,7 @@
 
 Teeny-weeny cached variable library with auto refresh and anti stampede.
 
-## Usage
+## Usage basic
 
 ```go
 v := 0
@@ -17,6 +17,22 @@ counter := memo.Memo(func() any {
 }, time.Second)
 
 for {
-  fmt.Printf("Counter %s", counter())
+  fmt.Printf("Counter %d", counter())
 }
 ```
+
+## Usage with generics
+
+```go
+v := 0
+counter := Gen[int](func() int{
+  v=v+1
+  return v
+}).Memo(time.Second)
+
+for {
+  fmt.Printf("Counter %d", counter())
+}
+```
+
+You can just wrap any function into a `Gen` or `GenX` struct and specify the refresh interval using the `Memo` method.

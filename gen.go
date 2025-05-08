@@ -41,7 +41,7 @@ func (g Gen[T]) Memo(r time.Duration) Gen[T] {
 	}
 }
 
-func (g GenX[T]) MemoX(r time.Duration) (Gen[T], error) {
+func (g GenX[T]) Memo(r time.Duration) (Gen[T], error) {
 	data, err := g()
 	if err != nil {
 		return nil, err

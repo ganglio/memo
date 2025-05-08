@@ -31,7 +31,7 @@ func TestGenMemoX(t *testing.T) {
 			return v, errors.New("Raising exception!")
 		}
 		return v, nil
-	}).MemoX(10 * time.Millisecond)
+	}).Memo(10 * time.Millisecond)
 
 	assert.NoError(t, err)
 
@@ -47,7 +47,7 @@ func TestGenMemoX(t *testing.T) {
 func TestGenMemoX2(t *testing.T) {
 	_, err := GenX[int](func() (int, error) {
 		return -1, errors.New("Raising exception!")
-	}).MemoX(10 * time.Millisecond)
+	}).Memo(10 * time.Millisecond)
 
 	assert.Error(t, err)
 }
