@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGenMemo(t *testing.T) {
+func TestMemo(t *testing.T) {
 	f := M[string](func() string {
 		return fmt.Sprintf("Pesco %s", time.Now().Format("15:04:05"))
 	}).Memo(time.Second)
@@ -23,7 +23,7 @@ func TestGenMemo(t *testing.T) {
 	assert.NotEqual(t, now, f()) // refreshed value
 }
 
-func TestGenMemoX(t *testing.T) {
+func TestMemoX(t *testing.T) {
 	v := 0
 	f, err := MX[int](func() (int, error) {
 		v = v + 1
@@ -37,14 +37,14 @@ func TestGenMemoX(t *testing.T) {
 
 	p := -1
 	for i := 0; i < 20; i++ {
-		p = f()
+		p, err = f()
 		time.Sleep(50 * time.Millisecond)
 	}
 	assert.Equal(t, v, 20)
 	assert.Equal(t, p, 19)
 }
 
-func TestGenMemoX2(t *testing.T) {
+func TestMemoX2(t *testing.T) {
 	_, err := MX[int](func() (int, error) {
 		return -1, errors.New("Raising exception!")
 	}).Memo(10 * time.Millisecond)
@@ -52,7 +52,44 @@ func TestGenMemoX2(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestGenStampede(t *testing.T) {
+func TestMemoX3(t *testing.T) {
+	v := 0
+	f, err := MX[int](func() (int, error) {
+		if v > 2 {
+			return v, errors.New("Raising exception!")
+		}
+		v = v + 1
+		return v, nil
+	}).Memo(10 * time.Millisecond)
+
+	assert.NoError(t, err)
+
+	time.Sleep(50 * time.Millisecond)
+
+	p, err := f()
+	assert.NoError(t, err)
+	assert.Equal(t, 1, p)
+
+	time.Sleep(50 * time.Millisecond)
+
+	p, err = f()
+	assert.NoError(t, err)
+	assert.Equal(t, 2, p)
+
+	time.Sleep(50 * time.Millisecond)
+
+	p, err = f()
+	assert.NoError(t, err)
+	assert.Equal(t, 3, p)
+
+	time.Sleep(50 * time.Millisecond)
+
+	p, err = f()
+	assert.Error(t, err)
+	assert.Equal(t, 3, p)
+}
+
+func TestStampede(t *testing.T) {
 	v := 0
 	f := M[int](func() int {
 		v = v + 1
