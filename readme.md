@@ -1,31 +1,15 @@
 # Memo
 
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/ganglio/memo/tree/master.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/ganglio/memo/tree/master)
-[![codecov](https://codecov.io/gh/ganglio/memo/branch/master/graph/badge.svg)](https://codecov.io/gh/ganglio/memo)
 [![GoDoc](https://godoc.org/github.com/ganglio/memo?status.svg)](https://godoc.org/github.com/ganglio/memo)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ganglio/memo)](https://goreportcard.com/report/github.com/ganglio/memo)
 
 Teeny-weeny cached variable library with auto refresh and anti stampede.
 
-## Usage basic
+## Usage
 
 ```go
 v := 0
-counter := memo.Memo(func() any {
-  v = v + 1
-  return v
-}, time.Second)
-
-for {
-  fmt.Printf("Counter %d", counter())
-}
-```
-
-## Usage with generics
-
-```go
-v := 0
-counter := Gen[int](func() int{
+counter := M[int](func() int{
   v=v+1
   return v
 }).Memo(time.Second)
@@ -35,4 +19,26 @@ for {
 }
 ```
 
-You can just wrap any function into a `Gen` or `GenX` struct and specify the refresh interval using the `Memo` method.
+If you function can return an error, use `GX` like following:
+
+```go
+v := 0
+counter := MX[int](func() (int, error){
+  if (v<0) {
+    return v, errors.New("Cannot start with a negative counter, for some reason...")
+  }
+  v := v+1
+  return v, nil
+}).Memo(time.Second)
+
+for {
+  fmt.Printf("Counter %d", counter())
+}
+```
+
+In this case it works like this:
+
+  * If the generator returns an error, the Memo method will return the error upon first cache warmup.
+  * If not it will return the wrapped function.
+  * After the first initialisation, if the generator returns an error, it will be ignored and the previous value of the function will be returned.
+    * This means that the errors must be handled inside the generator.

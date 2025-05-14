@@ -10,7 +10,7 @@ import (
 )
 
 func TestGenMemo(t *testing.T) {
-	f := Gen[string](func() string {
+	f := M[string](func() string {
 		return fmt.Sprintf("Pesco %s", time.Now().Format("15:04:05"))
 	}).Memo(time.Second)
 
@@ -25,7 +25,7 @@ func TestGenMemo(t *testing.T) {
 
 func TestGenMemoX(t *testing.T) {
 	v := 0
-	f, err := GenX[int](func() (int, error) {
+	f, err := MX[int](func() (int, error) {
 		v = v + 1
 		if v >= 3 && v <= 7 {
 			return v, errors.New("Raising exception!")
@@ -45,7 +45,7 @@ func TestGenMemoX(t *testing.T) {
 }
 
 func TestGenMemoX2(t *testing.T) {
-	_, err := GenX[int](func() (int, error) {
+	_, err := MX[int](func() (int, error) {
 		return -1, errors.New("Raising exception!")
 	}).Memo(10 * time.Millisecond)
 
@@ -54,7 +54,7 @@ func TestGenMemoX2(t *testing.T) {
 
 func TestGenStampede(t *testing.T) {
 	v := 0
-	f := Gen[int](func() int {
+	f := M[int](func() int {
 		v = v + 1
 		return v
 	}).Memo(time.Second)
@@ -74,7 +74,7 @@ func TestGenStampede(t *testing.T) {
 
 func BenchmarkGenMemo(b *testing.B) {
 	v := 0
-	f := Gen[int](func() int {
+	f := M[int](func() int {
 		v = v + 1
 		return v
 	}).Memo(time.Second)

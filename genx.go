@@ -5,9 +5,13 @@ import (
 	"time"
 )
 
-type M[T any] func() T
+type MX[T any] func() (T, error)
 
-func (g M[T]) Memo(r time.Duration) M[T] {
+func (g MX[T]) Memo(r time.Duration) (M[T], error) {
+	data, err := g()
+	if err != nil {
+		return nil, err
+	}
 	m := struct {
 		sync.Mutex
 		data            T
@@ -15,7 +19,7 @@ func (g M[T]) Memo(r time.Duration) M[T] {
 		refreshInterval time.Duration
 		refreshing      bool
 	}{
-		data:            g(),
+		data:            data,
 		lastUpdate:      time.Now(),
 		refreshInterval: r,
 		refreshing:      false,
@@ -27,15 +31,17 @@ func (g M[T]) Memo(r time.Duration) M[T] {
 			if !m.refreshing {
 				m.refreshing = true
 				go func() {
-					data := g()
+					data, err := g()
 					m.Lock()
-					m.data = data
-					m.lastUpdate = time.Now()
+					if err == nil {
+						m.data = data
+						m.lastUpdate = time.Now()
+					}
 					m.refreshing = false
 					m.Unlock()
 				}()
 			}
 		}
 		return m.data
-	}
+	}, nil
 }
